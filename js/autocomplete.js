@@ -1,4 +1,4 @@
-const STRING = 'строка'
+
 
 // Функция для загрузки стилей
 function loadStyles() {
@@ -11,10 +11,22 @@ function loadStyles() {
 loadStyles();
 
 export default class Autocomplete {
-    constructor({editor, getSuggestionsCallback, addVariableCallback}) {
+    STRING = 'строка'
+    
+    PAIRED_CHARS_LIST = {
+        '(': ')', 
+        '"': '"' 
+        //'{': '}', 
+        //'[': ']', 
+    }
+    pairChars = {}; // Хранение парных символов
+    spaceHoldTimeout; // Таймер для отслеживания времени зажатия пробела
+    isSpaceHeld = false; // Флаг зажатия пробела
+    
+    constructor({editor, getSuggestions, addVariable}) {
         this.editor = editor
-        this.getSuggestions = getSuggestionsCallback; // Функция получения подсказок
-        this.addVariable = addVariableCallback; // Функция добавления переменной
+        this.getSuggestions = getSuggestions; // Функция получения подсказок
+        this.addVariable = addVariable; // Функция добавления переменной
         this.handledByAutocomplete = false // флаг обработки события подсказками
 
 
@@ -36,6 +48,11 @@ export default class Autocomplete {
 
         editor.addEventListener('input', (event) => this.handleInput(event));
         editor.addEventListener('keydown', (event) => this.handleKeyDown(event));
+        editor.addEventListener('keyup', (event) => {
+            if (event.key === ' ') {                
+                clearTimeout(this.spaceHoldTimeout); // Отменяем таймер, если пробел отпущен
+            }
+        });
 
     }
 
@@ -52,9 +69,12 @@ export default class Autocomplete {
     }
 
 
-    handleInput(event) {
+    handleInput() {
+        this.validatePairChars()
+
         const inputValue = this.editor.value.substring(0, this.editor.selectionStart);
-        const lastWordMatch = inputValue.match(/\b[a-zA-Z0-9_]+$/);
+        const lastWordMatch = inputValue.match(/[\p{L}\p{N}_]+$/u);
+
 
         if (lastWordMatch) {
             const lastWord = lastWordMatch[0];
@@ -68,26 +88,31 @@ export default class Autocomplete {
         } else {
             this.hideSuggestions();
         }
-
-        // Если пользователь нажал пробел, создаем переменную
-        if (event.inputType === 'insertText' && event.data === ' ') {
-            const words = inputValue.trim().split(/\s+/);
-            const newVariable = words[words.length - 2]; // Предпоследнее слово
-
-            if (newVariable && /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(newVariable)) {
-                this.addVariable(newVariable);
-                console.log('add new')
-            }
-        }
     }
 
     handleKeyDown(event) {
         console.log('arrowDown autocomplete')
+        if (event.key === ' ') {
+            event.preventDefault(); // Чтобы пробел не добавлялся в текст
+            this.handledByAutocomplete = false
+
+            if (!this.isSpaceHeld) {
+                this.isSpaceHeld = true;
+                this.spaceHoldTimeout = setTimeout(() => {
+                    this.showSuggestions(this.getSuggestions()); 
+                }, 2000);
+            }
+
+            return
+        }
+
         if (this.suggestionBox.style.display === 'block') {
             const activeItem = this.suggestionBox.querySelector('.active');
             const items = Array.from(this.suggestionBox.children);
 
             this.handledByAutocomplete = false
+
+            
 
             if (event.key === 'ArrowDown') {
                 event.preventDefault()
@@ -97,7 +122,6 @@ export default class Autocomplete {
                     : items[0];
                 if (activeItem) activeItem.classList.remove('active');
                 nextItem.classList.add('active');
-                return true; // Событие обработано
             }
 
             if (event.key === 'ArrowUp') {
@@ -108,7 +132,6 @@ export default class Autocomplete {
                     : items[items.length - 1];
                 if (activeItem) activeItem.classList.remove('active');
                 prevItem.classList.add('active');
-                return true; // Событие обработано
             }
 
             if (event.key === 'Enter') {                
@@ -116,19 +139,32 @@ export default class Autocomplete {
                     event.preventDefault();
                     this.handledByAutocomplete = false;
 
-                    const inputValue = this.editor.value.substring(0, this.editor.selectionStart);
-                    const lastWordMatch = inputValue.match(/[\w]+$/); // Ищем последнее слово вне кавычек
-                    const lastWord = lastWordMatch ? lastWordMatch[0] : "";
-
-                    if (activeItem.textContent === STRING && lastWord) {
-                        this.insertAtCursor(`"${lastWord}"`);
+                    if (activeItem.textContent === this.STRING) {
+                        const inputValue = this.editor.value.substring(0, this.editor.selectionStart);
+                        const lastWord = this.wrapInQuotes({text: inputValue})    
+                    
+                        if (lastWord) {                            
+                            this.insertAtCursor(lastWord)
+                        }
                     } else {
-                        this.insertAtCursor(activeItem.textContent);
+                        const quotted = this.wrapInQuotes({text: activeItem.textContent})
+                        this.insertAtCursor(quotted ?? activeItem.textContent)
                     }
                 }
                 this.hideSuggestions();
             }
         }
+    }
+
+    wrapInQuotes({text}) {
+        const match = this.getLastWord({text})
+        return match ? `"${match}"` : null
+    }
+
+    getLastWord({text}) {
+        // ищем последнее слово, которое может включать эмодзи.
+        const REG_TEXT_WITH_EMODJI = /[\p{L}\p{N}\p{Extended_Pictographic}_]+$/u
+        return text.match(REG_TEXT_WITH_EMODJI)?.[0]
     }
 
 
@@ -142,7 +178,7 @@ export default class Autocomplete {
         this.suggestionBox.style.display = 'block';
         this.suggestionBox.innerHTML = '';
 
-        [STRING].concat(...suggestions).forEach((suggestion) => {
+        [this.STRING].concat(...suggestions).forEach((suggestion) => {
             const item = document.createElement('div');
             item.textContent = suggestion;
             item.className = 'suggestion-item';
@@ -159,6 +195,7 @@ export default class Autocomplete {
 
     hideSuggestions() {
         this.suggestionBox.style.display = 'none';
+        this.isSpaceHeld = false;
     }
 
     insertAtCursor(text) {
@@ -183,5 +220,23 @@ export default class Autocomplete {
 
         // Фокусируем редактор
         this.editor.focus();
+
+
+        const cursorPosition = this.editor.selectionStart
+        this.addPairChars({'"': {
+            [cursorPosition-lastWord.length]: cursorPosition + 1
+        }})
+    }
+
+    addPairChars() {
+
+    }
+
+    validatePairChars() {
+
+    }
+
+    removePair() {
+
     }
 }

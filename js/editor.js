@@ -15,37 +15,14 @@ loadStyles();
 let trainerAPI = null;
 let currentLineIndex = 0
 let numLines = 1
-const namespace = { xdf: 1, xcc: 1, xvc: 1 }; // Пространство имен редактора
-const specNamespace = {'🚢': 1} // пространство имен спецподсказок
+const namespace = { иван: 1, xdf: 1, xcc: 1, xvc: 1 }; // Пространство имен редактора
+const specNamespace = {'🚢': '🚢'} // пространство имен спецподсказок
 
 // Связываем редактор с тренажером
 export function setTrainerAPI(api) {
     trainerAPI = api;
 }
 
-
-// Callback для получения подсказок
-function getSuggestions(lastWord) {
-    return Object.keys(specNamespace).concat(...Object.keys(namespace).filter((variable) =>
-        variable.startsWith(lastWord)
-    ));
-}
-
-// Callback для добавления новой переменной
-function addVariable(variable) {
-    if (!namespace[variable]) {
-        namespace[variable] = null; // Новая переменная
-        console.log(`Добавлена переменная: ${variable}`);
-    }
-}
-
-function handleCommand(command) {
-    if (trainerAPI && trainerAPI.runCommand) {
-        trainerAPI.runCommand(command); // Отправляем команду тренажеру
-    } else {
-        console.error('Тренажер не подключен или отсутствует метод runCommand.');
-    }
-}
 
 export function init(container) {
     // Глобальная переменная для выбора транслятора
@@ -72,7 +49,7 @@ export function init(container) {
     const resultElement = container.querySelector('#result');
 
     // Подключаем модуль подсказок
-    const autocomplete = new Autocomplete({editorContainer, getSuggestions, addVariable});
+    const autocomplete = new Autocomplete({editor, getSuggestions, addVariable});
 
     // Подключаем LineManager
     const lineManager = new LineManager({editor, editorContainer});
@@ -104,6 +81,8 @@ export function init(container) {
 
         // Добавление `|` при нажатии пробела
         if (event.key === ' ') {
+            event.preventDefault();
+            autocomplete.hideSuggestions()
             const lastNewlineIndex = text.lastIndexOf('\n', cursorPosition - 1);
             const currentLine = text.slice(lastNewlineIndex + 1, cursorPosition);
 
@@ -112,7 +91,6 @@ export function init(container) {
                 return;
             }
 
-            event.preventDefault();
             const beforeCursor = text.slice(0, cursorPosition);
             const afterCursor = text.slice(cursorPosition);
             editor.value = `${beforeCursor} | ${afterCursor}`;
@@ -143,7 +121,7 @@ export function init(container) {
         }
 
         if (event.key === 'Backspace') {
-            event.preventDefault()
+            // event.preventDefault()
             handleBackspaceKey()
         }
         // Сбрасываем старый таймер
@@ -191,20 +169,7 @@ export function init(container) {
         lineManager.updateLines(editor.value);
     }
 
-    function handleBackspaceKey() {
-        const cursorPosition = editor.selectionStart;
-        const text = editor.value;
-    
-        let lastNewlineIndex = text.lastIndexOf('\n', cursorPosition - 1);
-        if (lastNewlineIndex === -1) lastNewlineIndex = 0;
-    
-        // Удаляем строку
-        const beforeCursor = text.slice(0, lastNewlineIndex);
-        const afterCursor = text.slice(lastNewlineIndex + 1);
-        editor.value = `${beforeCursor}${afterCursor}`;
-        editor.selectionStart = editor.selectionEnd = cursorPosition - 1;
-    
-        // Обновляем LineManager
+    function handleBackspaceKey() {    
         lineManager.updateLines(editor.value);
     }
 
@@ -292,5 +257,28 @@ export function init(container) {
 
     function setTranslator(newTranslator) {
         translator = newTranslator;
+    }
+}
+
+// Callback для получения подсказок
+function getSuggestions(lastWord) {
+    return Object.keys(specNamespace).concat(...Object.keys(namespace).filter((variable) =>
+        variable.startsWith(lastWord)
+    ));
+}
+
+// Callback для добавления новой переменной
+function addVariable(variable) {
+    if (!namespace[variable]) {
+        namespace[variable] = null; // Новая переменная
+        console.log(`Добавлена переменная: ${variable}`);
+    }
+}
+
+function handleCommand(command) {
+    if (trainerAPI && trainerAPI.runCommand) {
+        trainerAPI.runCommand(command); // Отправляем команду тренажеру
+    } else {
+        console.error('Тренажер не подключен или отсутствует метод runCommand.');
     }
 }
