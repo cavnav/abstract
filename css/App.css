@@ -65,13 +65,13 @@ body {
 
 /* Стили для контейнера с редактором */
 #content {
-  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   padding: 20px;
   overflow-y: auto;
   background-color: #fff;
-  position: relative;
-  display: flex;
-  align-items: flex-start;
 }
 
 /* Вложенный контейнер для текста и номеров строк */

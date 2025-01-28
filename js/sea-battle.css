@@ -1,48 +1,17 @@
-/* Общее оформление для поля */
-/* Общие стили для поля */
-#game-board {
-    display: grid;
-    grid-template-columns: repeat(3, 100px); /* 3 колонки по 100px */
-    grid-template-rows: repeat(3, 100px); /* 3 строки по 100px */
-    gap: 2px; /* Расстояние между клетками */
-    width: 302px; /* Ширина всего поля (3 клетки по 100px + 2 промежутка по 2px) */
-    height: 302px; /* Высота всего поля */
-    margin: 20px auto; /* Центрируем поле */
-  }
+#trainer-container {
   
-  /* Стили для каждой клетки */
-  #game-board .cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid #000; /* Граница вокруг каждой клетки */
-    font-size: 40px; /* Размер эмодзи, чтобы оно занимало большую часть клетки */
-    text-align: center; /* Центрирование текста (эмодзи) */
-    background-color: #f0f0f0; /* Цвет фона клетки */
-  }
+}
 
-  
-  .cell.sunk {
-    background-color: red; /* Потопленный корабль */
-  }
-  
-  .cell.hit {
-    background-color: orange; /* Попадание в цель */
-  }
-  
-  .cell.miss {
-    background-color: white; /* Промах */
-  }
-  
-  /* Заголовок */
-  h2 {
-    text-align: center;
-    font-size: 24px;
-    color: #333;
-    margin-bottom: 20px;
-  }
-  
-  #content {
-    text-align: center;
-  }
-  
+table {
+  border-collapse: collapse;
+  margin: 20px;
+}
+th, td {
+  border: 1px solid #000;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+}
+th {
+  background-color: #f0f0f0;
+}

@@ -28,7 +28,7 @@ export function init(container) {
     // Глобальная переменная для выбора транслятора
     let translator = (command) => command; // По умолчанию трансляция отсутствует
 
-    const pipeToEqualsTranslator = (command) => command.replace('|', '=');
+    const pipeToEqualsTranslator = (command) => command.replace(/ \| /g, '=').replace(/\n/g, ';')
 
 
     setTranslator(pipeToEqualsTranslator)
@@ -220,30 +220,25 @@ export function init(container) {
 
         let result = '';
         for (let i = 0; i <= lines.length - 1; i++) {
-            const line = lines[i].trim();
+            const line = lines[i]
+            let [left, right = left] = line.split(' | ')
 
-
-            const [address, valueExpression] = line.split('|').map(part => part.trim());
-
-            if (!line.includes('|')) {
-                if (address) {
-                    result = `${address} = ${variables[address]}`
-                }
-                continue
-            }
-            try {
-                const value = new Function(...Object.keys(variables), `return ${valueExpression}`)(
+            try {            
+                const value = new Function(...Object.keys(variables), `return ${right}`)(
                     ...Object.values(variables)
-                );
-                variables[address] = value;
-                result = `${address} = ${value}`
+                )
+                if (line.includes('|')) {
+                    variables[left] = value;
+                }
+                
+                result = `${left} = ${value}`
             } catch (err) {
-                variables[address] = undefined;
+                variables[left] = undefined;
                 result = `Ошибка: ${err.message}`
             }
         }
 
-        return result;
+        return result
     }
 
 
@@ -251,7 +246,7 @@ export function init(container) {
         const result = evaluateCode(); // Получаем команду из редактора
         resultElement.innerText = result; // Выводим результат в элемент
 
-        const translatedCode = translator(result); // Преобразуем команду с помощью транслятора
+        const translatedCode = translator(editor.value); // Преобразуем команду с помощью транслятора
         handleCommand(translatedCode); // Отправляем команду в тренажер
     }
 
@@ -276,9 +271,9 @@ function addVariable(variable) {
 }
 
 function handleCommand(command) {
-    if (trainerAPI && trainerAPI.runCommand) {
-        trainerAPI.runCommand(command); // Отправляем команду тренажеру
-    } else {
+    try {
+        trainerAPI?.runCommand?.(command); // Отправляем команду тренажеру
+    } catch(error) {
         console.error('Тренажер не подключен или отсутствует метод runCommand.');
     }
 }
