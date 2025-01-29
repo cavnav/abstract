@@ -1,0 +1,87 @@
+:root {
+  --font-size: 16px; /* Общий размер шрифта */
+  --font-family: monospace;
+  --padding: 10px; /* Горизонтальные отступы */
+  --line-number-bg: #f4f4f4; /* Фон номеров строк */
+  --line-number-color: #555; /* Цвет текста номеров строк */
+  --editor-line-height: 1.5; /* Общая высота строки */
+  --editor-bg: #fefefe; /* Фон редактора */
+  --editor-border: #ccc; /* Цвет границы редактора */
+  --editor-shadow: rgba(0, 0, 0, 0.1); /* Тень редактора */
+  --active-line-bg: #e0e0e0; /* Фон активной строки */
+}
+
+textarea, #lineNumbers {
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  height: 100vh;
+  background-color: #f9f9f9;
+}
+
+/* Стили для меню */
+#menu {
+  width: 200px;
+  background-color: #f4f4f4;
+  border-right: 1px solid #ccc;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#menu h1 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+#menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#menu ul li {
+  margin-bottom: 10px;
+}
+
+#menu ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+#menu ul li a:hover {
+  color: #007BFF;
+}
+
+/* Стили для контейнера с редактором */
+#content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+/* Вложенный контейнер для текста и номеров строк */
+#editor-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+.flex {
+  display: flex;
+}
