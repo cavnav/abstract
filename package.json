@@ -6,7 +6,6 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"konva": "^9.3.18",
 		"vite": "^6.0.11"
 	}
 }
