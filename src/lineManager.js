@@ -1,11 +1,4 @@
-// Функция для загрузки стилей
-function loadStyles() {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = './src/lineManager.css'; // Путь к вашему CSS-файлу
-    document.head.appendChild(link);
-  }
-loadStyles();
+import './lineManager.css'
 
 class LineManager { 
     constructor({ editor, editorContainer }) { 

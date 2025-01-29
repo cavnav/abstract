@@ -121,10 +121,53 @@ export function init(editorContainer) {
             clearTimeout(debounceTimer);
         }
 
+        handleDefFunc()
+
         // Устанавливаем новый таймер
         debounceTimer = setTimeout(updateResult, 1000);
     });
 
+    function handleDefFunc() {
+        const cursorPosition = editor.selectionStart;
+        const text = editor.value;
+        const lastNewlineIndex = text.indexOf('\n', cursorPosition);
+        const currentLine = text.slice(lastNewlineIndex + 1, cursorPosition);
+    
+        // Проверяем, является ли текущая строка вызовом функции
+        const match = currentLine.trim().match(/^(\w+)\(\)\s*$/);
+        if (!match) return;
+    
+        const functionName = match[1];
+    
+        // Удаляем строку из редактора
+        const before = text.slice(0, lastNewlineIndex + 1);
+        const after = text.slice(cursorPosition);
+        editor.value = `${before}${after}`;
+        editor.selectionStart = editor.selectionEnd = lastNewlineIndex + 1;
+    
+        openFunctionEditor(functionName);
+    }
+    
+    // Функция для открытия редактора функции
+    function openFunctionEditor(name) {
+        const editorWindow = document.createElement('div');
+        editorWindow.className = 'function-editor';
+        editorWindow.innerHTML = `
+            <h2>Функция ${name}</h2>
+            <label>Параметры:</label>
+            <input id="params" type="text" placeholder="x, y, r">
+            <label>Тело функции:</label>
+            <textarea id="body" placeholder="return x + y;"></textarea>
+            <button id="save">Сохранить</button>
+        `;
+    
+        document.body.appendChild(editorWindow);
+    
+        document.getElementById('save')?.addEventListener('click', () => {
+            document.body.removeChild(editorWindow);
+            // Здесь можно обработать введенные параметры и тело функции
+        });
+    }    
 
     function handleEnterKey(){
         const cursorPosition = editor.selectionStart; // Позиция курсора

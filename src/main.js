@@ -8,6 +8,7 @@ export async function loadEditor() {
     const editorContainer = getEditorContainer()
     editorContainer.innerHTML = '<p>Загрузка редактора...</p>';
     try {
+        resetContainer(getTrainerContainer())
         const editorModule = await import('./editor.js');
         editorModule.init(editorContainer); // Инициализация редактора
         editorAPI = editorModule; // Сохраняем ссылку на API редактора
@@ -17,9 +18,10 @@ export async function loadEditor() {
 }
 
 async function loadTrainer(trainer) {
+    resetContainer(getTrainerContainer())
     const trainerContainer = getTrainerContainer()
     trainerContainer.innerHTML = '<p>Загрузка тренажера...</p>';
-    try {
+    try {        
         const trainerModule = await import(`./trainers/${trainer}.js`);
         trainerModule.init(trainerContainer); // Инициализация тренажера
 
@@ -45,8 +47,6 @@ document.querySelectorAll('#menu .trainers a').forEach(link => {
 });
 
 document.getElementById('editor-link').addEventListener('click', () => {
-    // Очистим тренажер
-    resetContainer(getTrainerContainer())
     loadEditor()
 })
 

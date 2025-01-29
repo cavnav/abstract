@@ -137,6 +137,7 @@ export function init(content) {
   content.innerHTML = '<div id="draw-container"></div>';
   initCanvas('draw-container');
 }
+
 const namespace = {
   circle: 1,
   line: 1, 
@@ -148,5 +149,5 @@ const namespace = {
 export { 
   runCommand,
   namespace
- };
+ }
 
