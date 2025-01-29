@@ -232,7 +232,7 @@ export function init(container) {
                     variables[left] = value;
                 }
                 
-                result = `${left} = ${value}`
+                result = `${left} = ${JSON.stringify(value)}`
             } catch (err) {
                 variables[left] = undefined;
                 result = `Ошибка: ${err.message}`

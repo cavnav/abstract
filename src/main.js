@@ -19,7 +19,7 @@ async function loadEditor() {
 async function loadTrainer(trainer) {
     trainerContainer.innerHTML = '<p>Загрузка тренажера...</p>';
     try {
-        const trainerModule = await import(`./${trainer}.js`);
+        const trainerModule = await import(`./trainers/${trainer}.js`);
         trainerModule.init(trainerContainer); // Инициализация тренажера
 
         // Передаем API тренажера редактору

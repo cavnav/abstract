@@ -1,13 +1,5 @@
 // Функция для загрузки стилей
-function loadStyles() {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = './src/draw.css'; // Путь к вашему CSS-файлу
-  document.head.appendChild(link);
-}
-
-// Вызываем функцию загрузки стилей при инициализации тренажера
-loadStyles();
+import './draw.css'
 
 function runCommand(command) {
   try {

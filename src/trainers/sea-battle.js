@@ -1,13 +1,4 @@
-// Функция для загрузки стилей
-function loadStyles() {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = './src/sea-battle.css'; // Путь к вашему CSS-файлу
-  document.head.appendChild(link);
-}
-
-// Вызываем функцию загрузки стилей при инициализации тренажера
-loadStyles();
+import './sea-battle.css'
 
 // Поля для игрока и компьютера
 let playerField = {
