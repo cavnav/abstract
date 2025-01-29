@@ -26,6 +26,7 @@ async function loadTrainer(trainer) {
         if (editorAPI) {
             editorAPI.setTrainerAPI({
                 runCommand: trainerModule.runCommand,
+                extendNamespace: trainerModule.namespace,
             });
         }
     } catch (error) {

@@ -16,11 +16,12 @@ let trainerAPI = null;
 let currentLineIndex = 0
 let numLines = 1
 const namespace = { иван: 1, xdf: 1, xcc: 1, xvc: 1 }; // Пространство имен редактора
-const specNamespace = {'🚢': '🚢'} // пространство имен спецподсказок
+let specNamespace = {}
 
 // Связываем редактор с тренажером
-export function setTrainerAPI(api) {
-    trainerAPI = api;
+export function setTrainerAPI({runCommand, extendNamespace}) {
+    trainerAPI = {runCommand}
+    Object.assign(specNamespace, extendNamespace)
 }
 
 

@@ -41,8 +41,7 @@ function runCommand(command) {
     Object.assign(playerField, updatedContext)
 
     // Обновляем рендеринг
-    console.log(111, playerField)
-    //renderField({playerField, containerId: 'player-field'});
+    generateBattlefield({field: playerField, containerId: 'player-field'});
   } catch (error) {
     console.error('Ошибка выполнения команды:', error);
   }
@@ -162,31 +161,35 @@ export function init(content) {
     </div>
   `;
 
-  const size = 3
-  generateBattlefield({ size, containerId: 'player-field' })
-  generateBattlefield({ size, containerId: 'computer-field' })
+  generateBattlefield({ containerId: 'player-field', field: playerField })
+  generateBattlefield({ containerId: 'computer-field', field: computerField })
 }
 
-function generateBattlefield({ size, containerId }) {
+function generateBattlefield({ size = 3, containerId, field }) {
   const rows = size
   const cols = size
   const container = document.getElementById(containerId)
 
+  // Проверяем, существует ли контейнер
+  if (!container) {
+    console.error(`Элемент с id="${containerId}" не найден.`);
+    return;
+  }
+
+  // Очищаем содержимое контейнера
+  container.innerHTML = "";
+
   const table = document.createElement('table');
 
   const letters = ['a', 'b', 'c'];
-  const textures = {
-    water: '🌊',
-    ship: '🚢',
-    rocket: '🚀',
-    explosion: '💥',
-    miss: '❌'
-  };
+  const texturesMap = getSpecNames();
+  const textures = Object.values(texturesMap)
 
   // Создаем заголовок таблицы
   const headerRow = document.createElement('tr');
   const emptyHeader = document.createElement('th');
   headerRow.appendChild(emptyHeader); // Пустая ячейка
+
   for (let col = 0; col < cols; col++) {
     const th = document.createElement('th');
     th.textContent = letters[col];
@@ -207,19 +210,15 @@ function generateBattlefield({ size, containerId }) {
     for (let col = 0; col < cols; col++) {
       const td = document.createElement('td');
       td.dataset.row = row;
-      td.dataset.col = letters[col];
-      td.textContent = textures.water; // Устанавливаем текстуру воды по умолчанию
+      td.dataset.col = letters[col]
+      const key = letters[col]+row
+      let texture = textures.find(code => code === field[key])
+      if (texture && texture === texturesMap.rocket) {
+        texture = texturesMap.miss
+      }
+      td.textContent = texture || texturesMap.water
 
-      // Добавляем обработчик клика для примера
-      td.addEventListener('click', () => {
-        if (td.textContent === textures.water) {
-          td.textContent = textures.miss; // Помечаем "мимо"
-        } else if (td.textContent === textures.ship) {
-          td.textContent = textures.explosion; // Попадание
-        }
-      });
-
-      tr.appendChild(td);
+      tr.appendChild(td);      
     }
 
     table.appendChild(tr);
@@ -228,7 +227,18 @@ function generateBattlefield({ size, containerId }) {
   container.appendChild(table);
 }
 
-// Генерация поля 3x3
+function getSpecNames() {
+  return {
+    water: '🌊',
+    ship: '🚢',
+    rocket: '🚀',
+    explosion: '💥',
+    miss: '❌'
+  }
+}
 
-
-export { runCommand };
+const namespace = Object.values(getSpecNames()).reduce((res, value) => {res[value] = 1; return res;}, {})
+export { 
+  runCommand,
+  namespace
+ };
