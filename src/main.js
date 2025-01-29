@@ -1,11 +1,11 @@
 // Основной контейнер для отображения контента
-const content = document.getElementById('content');
-const editorContainer = document.getElementById('editor-container');
-const trainerContainer = document.getElementById('trainer-container');
+const getEditorContainer = () => document.getElementById('editor-container');
+const getTrainerContainer = () => document.getElementById('trainer-container');
 
 // Функция для загрузки редактора
 let editorAPI = null;
-async function loadEditor() {
+export async function loadEditor() {
+    const editorContainer = getEditorContainer()
     editorContainer.innerHTML = '<p>Загрузка редактора...</p>';
     try {
         const editorModule = await import('./editor.js');
@@ -17,6 +17,7 @@ async function loadEditor() {
 }
 
 async function loadTrainer(trainer) {
+    const trainerContainer = getTrainerContainer()
     trainerContainer.innerHTML = '<p>Загрузка тренажера...</p>';
     try {
         const trainerModule = await import(`./trainers/${trainer}.js`);
@@ -35,7 +36,7 @@ async function loadTrainer(trainer) {
 }
 
 // Добавляем обработчики для пунктов меню
-document.querySelectorAll('#menu a').forEach(link => {
+document.querySelectorAll('#menu .trainers a').forEach(link => {
     link.addEventListener('click', (event) => {
         event.preventDefault();
         const trainer = event.target.dataset.trainer;
@@ -43,5 +44,30 @@ document.querySelectorAll('#menu a').forEach(link => {
     });
 });
 
+document.getElementById('editor-link').addEventListener('click', () => {
+    // Очистим тренажер
+    resetContainer(getTrainerContainer())
+    loadEditor()
+})
+
+
+function resetContainer(container) {
+    if (container) {
+        const wrapper = container.parentNode;
+
+        // Создаем новый контейнер
+        const newContainer = document.createElement('div');
+        newContainer.id = container.id;
+
+        // Заменяем старый контейнер на новый
+        wrapper.replaceChild(newContainer, container);
+    } else {
+        console.warn(`Контейнер не найден.`);
+    }
+}
+
+
+
+
 // Загружаем редактор по умолчанию
-loadEditor('editor');
+loadEditor();

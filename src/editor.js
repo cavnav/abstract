@@ -1,15 +1,7 @@
 import Autocomplete from './autocomplete.js';
 import { LineManager } from './lineManager.js';
 
-// Функция для загрузки стилей
-function loadStyles() {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = './src/editor.css'; // Путь к вашему CSS-файлу
-    document.head.appendChild(link);
-  }
-// Вызываем функцию загрузки стилей при инициализации тренажера
-loadStyles();
+import './editor.css'
 
 
 let trainerAPI = null;
@@ -25,7 +17,7 @@ export function setTrainerAPI({runCommand, extendNamespace}) {
 }
 
 
-export function init(container) {
+export function init(editorContainer) {
     // Глобальная переменная для выбора транслятора
     let translator = (command) => command; // По умолчанию трансляция отсутствует
 
@@ -35,7 +27,7 @@ export function init(container) {
     setTranslator(pipeToEqualsTranslator)
 
     // Основной контейнер
-    container.innerHTML = `    
+    editorContainer.innerHTML = `    
     <div class="flex">    
         <textarea id="editor" placeholder="Введите текст здесь..."></textarea>
     </div>
@@ -45,9 +37,8 @@ export function init(container) {
     `;
 
     // Инициализация редактора
-    const editorContainer = document.querySelector('#editor-container');
-    const editor = container.querySelector('#editor');
-    const resultElement = container.querySelector('#result');
+    const editor = editorContainer.querySelector('#editor');
+    const resultElement = editorContainer.querySelector('#result');
 
     // Подключаем модуль подсказок
     const autocomplete = new Autocomplete({editor, getSuggestions, addVariable});

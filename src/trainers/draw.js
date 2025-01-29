@@ -3,13 +3,15 @@ import './draw.css'
 
 function runCommand(command) {
   try {
-    command = `
-    brush({color: 'red', size: 3});
-    circle({x: 100, y: 100, r: 40}); 
-    line({x1: 100, y1: 100, x2: 200, y2: 200});
-    fill({x: 90, y: 90, fillColor: 'blue', borderColor: 'red'});
-    `;
-    new Function('circle, line, brush, fill', `"use strict"; ${command}`)(drawCircle, drawLine, setBrush, floodFill);
+    // command = `
+    // brush({color: 'red', size: 3});
+    // circle({x: 100, y: 100, r: 40}); 
+    // line({x1: 100, y1: 100, x2: 200, y2: 200});
+    // fill({x: 90, y: 90, fillColor: 'blue', borderColor: 'red'});
+    // `;
+    new Function('circle, line, brush, fill, clear', 
+      `"use strict"; ${command}`
+    )(drawCircle, drawLine, setBrush, floodFill, clearCanvas);
   } catch (error) {
     console.error('Ошибка выполнения команды:', error);
   }
@@ -58,6 +60,10 @@ function drawLine({ x1, y1, x2, y2 }) {
 function setBrush({ color, size }) {
   brushColor = color;
   brushSize = size;
+}
+
+function clearCanvas() {
+  context.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 // Функция для получения цвета пикселя
@@ -128,8 +134,19 @@ function colorToRgb(color) {
 }
 
 export function init(content) {
-  content.innerHTML = '<div id="p5-container"></div>';
-  initCanvas('p5-container');
+  content.innerHTML = '<div id="draw-container"></div>';
+  initCanvas('draw-container');
+}
+const namespace = {
+  circle: 1,
+  line: 1, 
+  fill: 1,
+  brush: 1,
+  clear: 1
 }
 
-export { runCommand };
+export { 
+  runCommand,
+  namespace
+ };
+
