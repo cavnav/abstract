@@ -16,6 +16,15 @@ export function setTrainerAPI({runCommand, extendNamespace}) {
     Object.assign(specNamespace, extendNamespace)
 }
 
+export function output({
+    message,
+}){
+    const element = document.getElementById('trainer-output')
+    if (element) {
+        element.innerText = message
+    }
+}
+
 
 export function init(editorContainer) {
     // Глобальная переменная для выбора транслятора
@@ -27,7 +36,8 @@ export function init(editorContainer) {
     setTranslator(pipeToEqualsTranslator)
 
     // Основной контейнер
-    editorContainer.innerHTML = `    
+    editorContainer.innerHTML = `   
+    <div id="trainer-output"></div> 
     <div class="flex">    
         <textarea id="editor" placeholder="Введите текст здесь..."></textarea>
     </div>
@@ -51,6 +61,45 @@ export function init(editorContainer) {
 
     let debounceTimer = null; // Для отслеживания времени бездействия
 
+
+    document.getElementById('editor').addEventListener('input', function(event) {
+        const target = event.target;
+        if (target.textContent.endsWith('(')) {
+          // Подставляем закрывающую скобку
+          target.textContent += ')';
+      
+          // Создаем шаблон функции
+          const functionTemplate = document.createElement('div');
+          functionTemplate.className = 'function-template';
+          functionTemplate.innerHTML = `
+            <div class="function-name">${target.textContent.slice(0, -2)}</div>
+            <div class="parameters">
+              <div contenteditable="true">x</div>
+              <div contenteditable="true">y</div>
+            </div>
+            <div class="commands">
+              <div contenteditable="true">// тут можно писать код</div>
+            </div>
+            <button class="ok-button">Ок</button>
+          `;
+      
+          // Вставляем шаблон после текущего блока
+          target.parentNode.insertBefore(functionTemplate, target.nextSibling);
+      
+          // Добавляем обработчик для кнопки "Ок"
+          functionTemplate.querySelector('.ok-button').addEventListener('click', function() {
+            // Скрываем шаблон
+            functionTemplate.style.display = 'none';
+      
+            // Добавляем имя функции в окно пространства имен
+            const functionName = functionTemplate.querySelector('.function-name').textContent;
+            const namespace = document.getElementById('namespace');
+            const nameElement = document.createElement('div');
+            nameElement.textContent = functionName;
+            namespace.appendChild(nameElement);
+          });
+        }
+      });
 
     editor.addEventListener('click', () => {
         const text = editor.value; // Текущее значение текста

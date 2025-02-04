@@ -133,8 +133,8 @@ function colorToRgb(color) {
   return rgbArray ? rgbArray.map(Number) : null; // Возвращает массив [R, G, B] или null
 }
 
-export function init(content) {
-  content.innerHTML = '<div id="draw-container"></div>';
+export function init({container}) {
+  container.innerHTML = '<div id="draw-container"></div>';
   initCanvas('draw-container');
 }
 
