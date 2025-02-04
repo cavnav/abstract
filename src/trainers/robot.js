@@ -7,6 +7,7 @@ const variables = {}; // Переменные и их клетки
 let cells
 let robot
 let robotApi
+let isProcessing = false
 
 
 export function init({ container, output }) {
@@ -53,7 +54,10 @@ export function init({ container, output }) {
 }
 
 async function runCommand(command) {
-    if (!command) return;
+    if (!command || isProcessing) return
+
+    isProcessing = true
+
     const [lastCommand] = command.split(';').slice(-1)
 
     robotApi.sendMessage({ value: '' })
@@ -67,6 +71,8 @@ async function runCommand(command) {
     }
 
     robotApi.gotoStart()
+
+    isProcessing = false
 }
 
 async function writeVariable({ name, expression }) {
