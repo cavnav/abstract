@@ -301,29 +301,60 @@ export function init(editorContainer) {
     function evaluateCode() {
         const lines = editor.value.split('\n');
         const variables = {};
-
+        const functions = {}; // Хранение функций
+    
+        let currentFunction = null; // Текущая функция, в которую записываются строки
         let result = '';
-        for (let i = 0; i <= lines.length - 1; i++) {
-            const line = lines[i]
-            let [left, right = left] = line.split(' | ')
-
-            try {            
+    
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line === '') continue; // Пропуск пустых строк
+    
+            // Если это вызов или объявление функции
+            if (line.endsWith('()')) {
+                const functionName = line.slice(0, -2);
+                if (functions[functionName]) {
+                    // Вызов функции
+                    functions[functionName].forEach(fnLine => executeLine(fnLine));
+                } else {
+                    // Объявление новой функции
+                    functions[functionName] = [];
+                    currentFunction = functionName;
+                }
+                continue;
+            }
+    
+            if (currentFunction) {
+                // Если идёт объявление тела функции
+                functions[currentFunction].push(line);
+                continue;
+            }
+    
+            // Если обычная строка с присвоением
+            executeLine(line);
+        }
+    
+        function executeLine(line) {
+            let [left, right = left] = line.split(' | ');
+    
+            try {
                 const value = new Function(...Object.keys(variables), `return ${right}`)(
                     ...Object.values(variables)
-                )
+                );
                 if (line.includes('|')) {
                     variables[left] = value;
                 }
-                
-                result = `${left} = ${JSON.stringify(value)}`
+    
+                result = `${left} = ${JSON.stringify(value)}`;
             } catch (err) {
                 variables[left] = undefined;
-                result = `Ошибка: ${err.message}`
+                result = `Ошибка: ${err.message}`;
             }
         }
-
-        return result
+    
+        return result;
     }
+    
 
 
     function updateResult() {
